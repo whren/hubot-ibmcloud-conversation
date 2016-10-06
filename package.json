@@ -1,7 +1,7 @@
 {
   "name": "hubot-ibmcloud-conversation",
   "description": "Adds Conversation capabilities to Hubot",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "author": "Tanguy de Lignieres",
   "license": "MIT",
 
@@ -9,7 +9,7 @@
 
   "repository": {
     "type": "git",
-    "url": "https://github.com/whren/hubot-ibmcloud-conversation"
+    "url": "https://github.com/whren/hubot-ibmcloud-conversation.git"
   },
 
   "bugs": {
