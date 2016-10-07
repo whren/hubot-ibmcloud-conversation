@@ -76,7 +76,7 @@ function checkBotNameInMessage(botName, text, robot) {
  */
 function isSlack(robot) {
 	return (robot && robot.adapterName && robot.adapterName.toLowerCase().indexOf('slack') > -1);
-},
+}
 
 /*
  * true if we are certain the robot is running in slack, else false.
