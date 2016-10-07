@@ -106,7 +106,7 @@ module.exports = function(robot) {
 	var botName = robot.name;
 
 	if (env.conversation_enabled) {
-		robot.catchAll((res) => {
+		robot.catchAll(function(res) {
 			// ignore other bots
 			if (isMessageFromBot(res)) {
 				return;
