@@ -62,8 +62,8 @@ function checkBotNameInMessage(botName, text, robot) {
 	}
 	var reversedBotName = esrever.reverse(modifiedBotName);
 
-	var lookAheadRegExp = new RegExp(`(${modifiedBotName})(?\!\\w)`);
-	var lookBehindRegExp = new RegExp(`(${reversedBotName})(?\!\\w)`);
+	var lookAheadRegExp = new RegExp('(${modifiedBotName})(?\!\\w)');
+	var lookBehindRegExp = new RegExp('(${reversedBotName})(?\!\\w)');
 
 	lookAheadCheck = text.match(lookAheadRegExp) !== null;
 	lookBehindCheck = esrever.reverse(text).match(lookBehindRegExp) !== null;
