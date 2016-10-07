@@ -37,7 +37,8 @@
     "matchdep": "~0.3.0",
     "mocha": "^2.1.0",
     "sinon": "^1.13.0",
-    "sinon-chai": "^2.7.0"
+    "sinon-chai": "^2.7.0",
+    "request": "^2.75.0"
   },
 
   "main": "index.coffee",
