@@ -1,7 +1,9 @@
-const esrever = require('esrever');
-const path = require('path');
-const env = require(path.resolve(__dirname, '..', 'lib', 'env'));
-const request = require('request');
+'use strict';
+
+var esrever = require('esrever');
+var path = require('path');
+var env = require(path.resolve(__dirname, '..', 'lib', 'env'));
+var request = require('request');
 
 
 var url = 
