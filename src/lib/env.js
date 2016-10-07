@@ -1,6 +1,6 @@
 'use strict';
 
-let settings = {
+var settings = {
 	conversation_url: process.env.HUBOT_WATSON_CONVERSATION_URL,
 	conversation_username: process.env.HUBOT_WATSON_CONVERSATION_USERNAME,
 	conversation_password: process.env.HUBOT_WATSON_CONVERSATION_PASSWORD,

@@ -45,7 +45,7 @@ function callConversationService(json, action) {
  * Strips the bot name from the given statement.
  */
 function stripBotName(botName, text) {
-	let nameToken = new RegExp('(^|\\s)@?' + botName + ':?\\s', 'g');
+	var nameToken = new RegExp('(^|\\s)@?' + botName + ':?\\s', 'g');
 	return text.replace(nameToken, ' ').trim();
 }
 
@@ -53,17 +53,17 @@ function stripBotName(botName, text) {
  * Checks to see if the bot has been addressed in a message.
  */
 function checkBotNameInMessage(botName, text, robot) {
-	let lookBehindCheck = false;
-	let lookAheadCheck = false;
+	var lookBehindCheck = false;
+	var lookAheadCheck = false;
 
-	let modifiedBotName = botName;
+	var modifiedBotName = botName;
 	if (utils.isSlack(robot)) {
 		modifiedBotName = `@${botName}`;
 	}
-	let reversedBotName = esrever.reverse(modifiedBotName);
+	var reversedBotName = esrever.reverse(modifiedBotName);
 
-	let lookAheadRegExp = new RegExp(`(${modifiedBotName})(?\!\\w)`);
-	let lookBehindRegExp = new RegExp(`(${reversedBotName})(?\!\\w)`);
+	var lookAheadRegExp = new RegExp(`(${modifiedBotName})(?\!\\w)`);
+	var lookBehindRegExp = new RegExp(`(${reversedBotName})(?\!\\w)`);
 
 	lookAheadCheck = text.match(lookAheadRegExp) !== null;
 	lookBehindCheck = esrever.reverse(text).match(lookBehindRegExp) !== null;
@@ -103,7 +103,7 @@ function isMessageFromBot(res) {
 // Start of the HUBOT interactions.
 // ----------------------------------------------------
 module.exports = function(robot) {
-	let botName = robot.name;
+	var botName = robot.name;
 
 	robot.catchAll((res) => {
 		if (env.conversation_enabled) {
@@ -111,13 +111,13 @@ module.exports = function(robot) {
 			if (isMessageFromBot(res)) {
 				return;
 			}
-			let directMessage = isDirectMessage(res);
-			let botAddressedInMessage = checkBotNameInMessage(botName, res.message.text, robot);
+			var directMessage = isDirectMessage(res);
+			var botAddressedInMessage = checkBotNameInMessage(botName, res.message.text, robot);
 
 			// Respond only when the bot is addressed in a public room or if it's a private message
 			if (directMessage || botAddressedInMessage) {
 				// Remove the bot name from the bot statement
-				let text = stripBotName(botName, res.message.text).trim();
+				var text = stripBotName(botName, res.message.text).trim();
 				// make sure we have more than one word in the text
 				if (text.split(' ').length > 1) {
 				    callConversationService('{}', function (resp) {
