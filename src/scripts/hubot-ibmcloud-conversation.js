@@ -105,8 +105,8 @@ function isMessageFromBot(res) {
 module.exports = function(robot) {
 	var botName = robot.name;
 
-	robot.catchAll((res) => {
-		if (env.conversation_enabled) {
+	if (env.conversation_enabled) {
+		robot.catchAll((res) => {
 			// ignore other bots
 			if (isMessageFromBot(res)) {
 				return;
@@ -155,8 +155,8 @@ module.exports = function(robot) {
 	**/
 				}
 			}
-		}
-	});
+		});
+	}
 
 /**
 	robot.on('nlc.help', (res) => {
