@@ -1,4 +1,4 @@
-'use strict';
+//'use strict';
 
 let settings = {
 	conversation_url: process.env.HUBOT_WATSON_CONVERSATION_URL,
