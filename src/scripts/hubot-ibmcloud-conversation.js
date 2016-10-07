@@ -58,7 +58,7 @@ function checkBotNameInMessage(botName, text, robot) {
 
 	var modifiedBotName = botName;
 	if (utils.isSlack(robot)) {
-		modifiedBotName = `@${botName}`;
+		modifiedBotName = "@${botName}";
 	}
 	var reversedBotName = esrever.reverse(modifiedBotName);
 
