@@ -2,7 +2,7 @@
 
 Adds Conversation capabilities to Hubot
 
-See [`src/ibmcloud-conversation.coffee`](src/ibmcloud-conversation.coffee) for full documentation.
+See [`src/scripts/hubot-ibmcloud-conversation.js`](src/scripts/hubot-ibmcloud-conversation.js) for full documentation.
 
 ## Installation
 

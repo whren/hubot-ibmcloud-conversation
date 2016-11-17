@@ -18,7 +18,9 @@
 
   "dependencies": {
     "esrever": "^0.2.0",
-    "request": "^2.75.0"
+    "request": "^2.75.0",
+    "ws": "^1.1.1",
+    "localStorage": "^1.0.3"
   },
 
   "peerDependencies": {
