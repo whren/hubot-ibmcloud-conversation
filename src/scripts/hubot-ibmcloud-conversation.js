@@ -58,7 +58,7 @@ function conversationTimeoutChecker() {
     		var currentIdle = Date.now() - conversations[room][user].last;
 
     		if (currentIdle < conversationTimeout && currentIdle >= (conversationTimeout - (conversationTimeout / 4)) && !conversations[room][user].timeoutWarning) {
-    			robot.messageRoom(room, "@" + user + ": Je vous ai perdu... ?");
+    			robot.messageRoom(room, (!conversations[room][user].directMessage ? "@" + user + ": " : "") + "Je vous ai perdu... ?");
     			conversations[room][user].timeoutWarning = true;
     		} else if (currentIdle >= conversationTimeout) {
     			// If timeout has been reached
@@ -524,7 +524,7 @@ module.exports = function(robotAdapter) {
 //								robot.messageRoom(room, txt);
 //							}
 						}
-						conversations[room][user] = {"resp": resp, "last": Date.now()};
+						conversations[room][user] = {"directMessage": isDirectMessage(res), "resp": resp, "timeoutWarning": false, "last": Date.now()};
 						var req_json = '{\"input\":{\"text\":\"' + 
 							text + 
 							'\"},\"context\":{\"conversation_id\":\"' + 
@@ -566,6 +566,7 @@ module.exports = function(robotAdapter) {
 //									robot.messageRoom(room, txt);
 //								}
 							}
+							conversations[room][user].directMessage = isDirectMessage(res);
 							conversations[room][user].resp = resp2;
 							conversations[room][user].last = Date.now();
 							conversations[room][user].timeoutWarning = false;
