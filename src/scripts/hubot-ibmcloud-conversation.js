@@ -63,6 +63,7 @@ function conversationTimeoutChecker() {
     		} else if (currentIdle >= conversationTimeout) {
     			// If timeout has been reached
 	        	robot.logger.info('>Conversation timeout checker, timed out for ' + room + ' - ' + user);
+	        	robot.messageRoom(room, (!conversations[room][user].directMessage ? "@" + user + ": " : "") + "J'ai mis fin à notre conversation, à bientôt");
 	            // Remove in memory chunk
 	            conversations[room][user] = null;
 	            delete conversations[room][user];
