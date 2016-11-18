@@ -341,15 +341,15 @@ module.exports = function(robotAdapter) {
 					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
 					    attachments: [
 					        {
-					            fallback: "Projet <" + jsonMessage.var.full_url + "|" + jsonMessage.var.projectName + "> : " +  jsonMessage.var.jobName +" est " + jsonMessage.var.statut + (jsonMessage.var.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.var.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+					            fallback: "Projet <" + jsonMessage.full_url + "|" + jsonMessage.projectName + "> : " +  jsonMessage.jobName +" est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
 					            mrkdwn_in: [
 					                "text"
 					            ],
-					            color: (jsonMessage.var.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.var.buildStatus === 'SUCCESS' ? "good" : encodeURIComponent("#439FE0"))),
-					            text: "Job " + jsonMessage.var.statut + (jsonMessage.var.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.var.buildStatus === 'SUCCESS' ? " avec succès" : "")),
-					            title: (jsonMessage.var.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.var.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet " + jsonMessage.var.projectName + " - " + jsonMessage.var.jobName,
-					            title_link: jsonMessage.var.full_url,
-					            footer: "<" + jsonMessage.var.full_url + "|Jenkins ADOP>",
+					            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : encodeURIComponent("#439FE0"))),
+					            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+					            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet " + jsonMessage.projectName + " - " + jsonMessage.jobName,
+					            title_link: jsonMessage.full_url,
+					            footer: "<" + jsonMessage.full_url + "|Jenkins ADOP>",
 					            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
 					            ts: Date.now()/1000
 					        }
