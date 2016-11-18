@@ -336,7 +336,9 @@ module.exports = function(robotAdapter) {
 				} catch (error) {}
 
 				if (jsonMessage) {
-					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, {
+					var timestamp = Date.now()/1000;
+
+					var sentMessage = robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, {
 					    token: process.env.HUBOT_SLACK_TOKEN,
 					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
 					    attachments: [
@@ -352,11 +354,16 @@ module.exports = function(robotAdapter) {
 					            //title_link: jsonMessage.full_url,
 					            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
 					            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
-					            ts: Date.now()/1000
+					            ts: timestamp
 					        }
 					    ],
 					    as_user: true
 					});
+
+					// keep information needed in order to edit the message
+					if (sentMessage) {
+						robot.logger.debug("Message posted id : " + sentMessage.message.id);
+					}
 				} else {
 	//				robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
 					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
