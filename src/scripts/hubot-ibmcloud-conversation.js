@@ -329,7 +329,37 @@ module.exports = function(robotAdapter) {
 			robot.emit('mqtt:sub', null, "hubot-ibmcloud-conversation", process.env.HUBOT_ADOP_NOTIFICATION_SUBSCRIBE_TOPIC);
 			robot.on('mqtt:onMessage:hubot-ibmcloud-conversation', function(message) {
 //				console.log("Receiving event");
-				robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
+				var jsonMessage;
+
+				try {
+					jsonMessage = JSON.parse(message.payloadString);
+				} catch (error) {}
+
+				if (jsonMessage) {
+					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, {
+					    token: process.env.HUBOT_SLACK_TOKEN,
+					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
+					    attachments: [
+					        {
+					            fallback: "Projet <" + jsonMessage.var.full_url + "|" + jsonMessage.var.projectName + "> : " +  jsonMessage.var.jobName +" est " + jsonMessage.var.statut + (jsonMessage.var.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.var.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+					            mrkdwn_in: [
+					                "text"
+					            ],
+					            color: (jsonMessage.var.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.var.buildStatus === 'SUCCESS' ? "good" : encodeURIComponent("#439FE0"))),
+					            text: "Job " + jsonMessage.var.statut + (jsonMessage.var.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.var.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+					            title: (jsonMessage.var.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.var.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet " + jsonMessage.var.projectName + " - " + jsonMessage.var.jobName,
+					            title_link: jsonMessage.var.full_url,
+					            footer: "<" + jsonMessage.var.full_url + "|Jenkins ADOP>",
+					            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
+					            ts: Date.now()/1000
+					        }
+					    ],
+					    as_user: true
+					});
+				} else {
+	//				robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
+					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
+				}
 			});
 		});
 
@@ -345,201 +375,84 @@ module.exports = function(robotAdapter) {
 		robot.hear(regx, {
 			id: 'hubot-ibmcloud-conversation.hubot-ibmcloud-conversation'
 		}, function(res) {
-			robot.logger.debug('>Conversation msg received : ' + res.message.text);
-			robot.logger.debug('>Conversation from : ' + res.message.user.name + " (id : " + res.message.user.id + ") | isBot " + res.message.user.is_bot);
-			robot.logger.debug('>Conversation on : ' + res.message.room[0]);
-			robot.logger.debug('>Conversation adapterName : ' + robot.adapterName);
-			if (isRocketChat()) {
-				robot.logger.debug('>Conversation room type : ' + res.robot.adapter.chatdriver.asteroid.collections["stream-room-messages"]._set._items.id.args[1].roomType);
-			}
-			robot.logger.debug('>Conversation res methods : ' + Object.getOwnPropertyNames(res).filter(function (p) {
-			    return typeof Math[p] === 'function';
-			}));
+			if ((res.message.user.name && res.message.user.id) || res.message.user.is_bot) {
+				robot.logger.debug('>Conversation msg received : ' + res.message.text);
+				robot.logger.debug('>Conversation from : ' + res.message.user.name + " (id : " + res.message.user.id + ") | isBot " + res.message.user.is_bot);
+				robot.logger.debug('>Conversation on : ' + res.message.room[0]);
+				robot.logger.debug('>Conversation adapterName : ' + robot.adapterName);
+				if (isRocketChat()) {
+					robot.logger.debug('>Conversation room type : ' + res.robot.adapter.chatdriver.asteroid.collections["stream-room-messages"]._set._items.id.args[1].roomType);
+				}
+				robot.logger.debug('>Conversation res methods : ' + Object.getOwnPropertyNames(res).filter(function (p) {
+				    return typeof Math[p] === 'function';
+				}));
 
-			// ignore other bots
-			if (isMessageFromBot(res)) {
-				return;
-			}
-			var directMessage = isDirectMessage(res);
-			var botAddressedInMessage = checkBotNameInMessage(botName, res.message.text);
+				// ignore other bots
+				if (isMessageFromBot(res)) {
+					return;
+				}
+				var directMessage = isDirectMessage(res);
+				var botAddressedInMessage = checkBotNameInMessage(botName, res.message.text);
 
-			robot.logger.debug('>Conversation direct message : ' + directMessage);
-			robot.logger.debug('>Conversation botAddressedInMessage : ' + botAddressedInMessage);
-			// Respond only when the bot is addressed in a public room or if it's a private message
-			if (directMessage || botAddressedInMessage) {
-				// Remove the bot name from the bot statement
-				var text = stripBotName(botName, res.message.text).trim();
-				robot.logger.debug('>Conversation text without name of the bot : ' + text);
-				// make sure we have more than one word in the text
-				robot.logger.info('>Conversation Call to conversation service');
-				var room = res.message.room;
-				var user = res.message.user.name;
+				robot.logger.debug('>Conversation direct message : ' + directMessage);
+				robot.logger.debug('>Conversation botAddressedInMessage : ' + botAddressedInMessage);
+				// Respond only when the bot is addressed in a public room or if it's a private message
+				if (directMessage || botAddressedInMessage) {
+					// Remove the bot name from the bot statement
+					var text = stripBotName(botName, res.message.text).trim();
+					robot.logger.debug('>Conversation text without name of the bot : ' + text);
+					// make sure we have more than one word in the text
+					robot.logger.info('>Conversation Call to conversation service');
+					var room = res.message.room;
+					var user = res.message.user.name;
 
-			    if (!checkNested(conversations, room)) {
-			    	conversations[room] = {};
-			    }
+				    if (!checkNested(conversations, room)) {
+				    	conversations[room] = {};
+				    }
 
-			    if (checkNested(conversations, room, user)) {
-					robot.logger.debug('>Conversation Existing conversation : ' + room + ' - ' + user);
-					var lisaContext = {
-						devops: false,
-						appName: "",
-						appType: "",
-						appStatus: "",
-						endFlow: false
-					};
-					if (conversations[room][user].resp.context.lisaContext) {
-						lisaContext.devops = conversations[room][user].resp.context.lisaContext.devops;
-						lisaContext.appName = conversations[room][user].resp.context.lisaContext.appName;
-						lisaContext.appType = conversations[room][user].resp.context.lisaContext.appType;
-						lisaContext.appStatus = conversations[room][user].resp.context.lisaContext.appStatus;
-						lisaContext.endFlow = conversations[room][user].resp.context.lisaContext.endFlow;
-					} else {
-						lisaContext = undefined;
-					}
-
-					var req_json = '{\"input\":{\"text\":\"' + 
-						text + 
-						'\"},\"context\":{\"conversation_id\":\"' + 
-						conversations[room][user].resp.context.conversation_id + 
-						'\",\"system\":{\"dialog_stack\":' +
-						JSON.stringify(conversations[room][user].resp.context.system.dialog_stack) +
-						',\"dialog_turn_counter\": ' +
-						conversations[room][user].resp.context.system.dialog_turn_counter +
-						',\"dialog_request_counter\": ' +
-						conversations[room][user].resp.context.system.dialog_request_counter +
-						'}' +
-//						(lisaContext.length > 0 ? ',' + lisaContext : '') +
-						(lisaContext ? ',\"lisaContext\":' + JSON.stringify(lisaContext) : '') +
-						'}' +
-						', \"entities\":' +
-						JSON.stringify(conversations[room][user].resp.entities) +
-//						', \"intents\":' +
-//						JSON.stringify(conversations[room][user].resp.intents) +
-						'}';
-					robot.logger.debug('>Conversation req_json : ' + req_json);
-					callConversationService(req_json, function (resp) {
-						robot.logger.debug('>Conversation conv id : ' + conversations[room][user].resp.context.conversation_id + ', response text : ' + resp.output.text);
-						var cache = [];
-						robot.logger.debug('>Conversation resp : ' + JSON.stringify(resp, function(key, value) {
-						    if (typeof value === 'object' && value !== null) {
-						        if (cache.indexOf(value) !== -1) {
-						            // Circular reference found, discard key
-						            return;
-						        }
-						        // Store value in our collection
-						        cache.push(value);
-						    }
-						    return value;
-						}));
-						cache = null; // Enable garbage collection
-						var txt = getResponseText(resp.output.text);
-						if (txt.length > 0) {
-//							if (directMessage) {
-								res.reply(txt);
-
-//								mqtt.publishMessage(
-//						        	process.env.MQTT_CLI_MSG_PUBLISH_TOPIC,
-//					        		txt,
-//					        		Number(process.env.MQTT_CLI_MSG_PUBLISH_QOS) || 0,
-//					        		(process.env.MQTT_CLI_MSG_PUBLISH_RETAINED === 'true')
-//					        	);
-
-//							} else {
-//								robot.messageRoom(room, txt);
-//							}
+				    if (checkNested(conversations, room, user)) {
+						robot.logger.debug('>Conversation Existing conversation : ' + room + ' - ' + user);
+						var lisaContext = {
+							devops: false,
+							appName: "",
+							appType: "",
+							appStatus: "",
+							endFlow: false
+						};
+						if (conversations[room][user].resp.context.lisaContext) {
+							lisaContext.devops = conversations[room][user].resp.context.lisaContext.devops;
+							lisaContext.appName = conversations[room][user].resp.context.lisaContext.appName;
+							lisaContext.appType = conversations[room][user].resp.context.lisaContext.appType;
+							lisaContext.appStatus = conversations[room][user].resp.context.lisaContext.appStatus;
+							lisaContext.endFlow = conversations[room][user].resp.context.lisaContext.endFlow;
+						} else {
+							lisaContext = undefined;
 						}
-						conversations[room][user].resp = resp;
-						conversations[room][user].last = Date.now();
-						conversations[room][user].timeoutWarning = false;
 
-						if (conversations[room][user].resp.context.lisaContext && conversations[room][user].resp.context.lisaContext.endFlow) {
-							// Fin du flow demandee
-							// Traitement des parametres
-							var lisaContext = conversations[room][user].resp.context.lisaContext;
-							
-							if (lisaContext.appType === "web" && lisaContext.appStatus === "new" && lisaContext.devops && lisaContext.appName) {
-								res.reply("Requesting project " + lisaContext.appName + " creation...");
-
-								var payload = {
-								    method:"POST",
-								    url: process.env.HUBOT_ADOP_URL 
-										+ process.env.HUBOT_WATSON_CONVERSATION_JENKINS_PROJECT_CREATION_URL + lisaContext.appName,
-								    credential: process.env.HUBOT_ADOP_USERNAME + ":" + process.env.HUBOT_ADOP_PASSWORD,
-								    headers: {
-								      "Content-Type":"application/json"
-								    }
-								  };
-
-								// Call to node-red api jenkins to create project
-								//robot.emit('mqtt:pub', msg, "lisa/status", "{button:" + video + ",value:1}");
-								robot.emit('adop:query', 
-									res,
-									process.env.HUBOT_NODE_RED_ENDPOINT_URL,
-									null,
-									JSON.stringify(payload),
-									function(err, res, body) {
-										if (body) {
-											res.reply("Done !");
-
-//											res.reply("Requesting source generation...");
-										}
-									}
-								);
-
-								// Remove conversation flow
-								conversations[room][user] = null;
-							    delete conversations[room][user];
-							}
-						}
-					}, onError);
-				} else {
-					robot.logger.debug('>Conversation New conversation : ' + room + ' - ' + user);
-				    callConversationService('{}', function (resp) {
-				    	var cache = [];
-						robot.logger.debug('>Conversation resp : ' + JSON.stringify(resp, function(key, value) {
-						    if (typeof value === 'object' && value !== null) {
-						        if (cache.indexOf(value) !== -1) {
-						            // Circular reference found, discard key
-						            return;
-						        }
-						        // Store value in our collection
-						        cache.push(value);
-						    }
-						    return value;
-						}));
-						cache = null; // Enable garbage collection
-						var txt = getResponseText(resp.output.text);
-						if (txt.length > 0) {
-//							if (directMessage) {
-								res.reply(txt);
-
-//								mqtt.publishMessage(
-//						        	process.env.MQTT_CLI_MSG_PUBLISH_TOPIC,
-//					        		txt,
-//					        		Number(process.env.MQTT_CLI_MSG_PUBLISH_QOS) || 0,
-//					        		(process.env.MQTT_CLI_MSG_PUBLISH_RETAINED === 'true')
-//					        	);
-
-//							} else {
-//								robot.messageRoom(room, txt);
-//							}
-						}
-						conversations[room][user] = {"directMessage": isDirectMessage(res), "resp": resp, "timeoutWarning": false, "last": Date.now()};
 						var req_json = '{\"input\":{\"text\":\"' + 
 							text + 
 							'\"},\"context\":{\"conversation_id\":\"' + 
 							conversations[room][user].resp.context.conversation_id + 
-							'\",\"system\":{\"dialog_stack\":[\"root\"],\"dialog_turn_counter\": ' +
+							'\",\"system\":{\"dialog_stack\":' +
+							JSON.stringify(conversations[room][user].resp.context.system.dialog_stack) +
+							',\"dialog_turn_counter\": ' +
 							conversations[room][user].resp.context.system.dialog_turn_counter +
 							',\"dialog_request_counter\": ' +
 							conversations[room][user].resp.context.system.dialog_request_counter +
-							'}}}';
-						    
-						callConversationService(req_json, function (resp2) {
-							robot.logger.debug('>Conversation conv id : ' + conversations[room][user].resp.context.conversation_id + ', response text : ' + resp2.output.text);
+							'}' +
+	//						(lisaContext.length > 0 ? ',' + lisaContext : '') +
+							(lisaContext ? ',\"lisaContext\":' + JSON.stringify(lisaContext) : '') +
+							'}' +
+							', \"entities\":' +
+							JSON.stringify(conversations[room][user].resp.entities) +
+	//						', \"intents\":' +
+	//						JSON.stringify(conversations[room][user].resp.intents) +
+							'}';
+						robot.logger.debug('>Conversation req_json : ' + req_json);
+						callConversationService(req_json, function (resp) {
+							robot.logger.debug('>Conversation conv id : ' + conversations[room][user].resp.context.conversation_id + ', response text : ' + resp.output.text);
 							var cache = [];
-							robot.logger.debug('>Conversation resp : ' + JSON.stringify(resp2, function(key, value) {
+							robot.logger.debug('>Conversation resp : ' + JSON.stringify(resp, function(key, value) {
 							    if (typeof value === 'object' && value !== null) {
 							        if (cache.indexOf(value) !== -1) {
 							            // Circular reference found, discard key
@@ -551,28 +464,147 @@ module.exports = function(robotAdapter) {
 							    return value;
 							}));
 							cache = null; // Enable garbage collection
-							var txt = getResponseText(resp2.output.text);
+							var txt = getResponseText(resp.output.text);
 							if (txt.length > 0) {
-//								if (directMessage) {
+	//							if (directMessage) {
 									res.reply(txt);
 
-//									mqtt.publishMessage(
-//							        	process.env.MQTT_CLI_MSG_PUBLISH_TOPIC,
-//						        		txt,
-//						        		Number(process.env.MQTT_CLI_MSG_PUBLISH_QOS) || 0,
-//						        		(process.env.MQTT_CLI_MSG_PUBLISH_RETAINED === 'true')
-//						        	);
+	//								mqtt.publishMessage(
+	//						        	process.env.MQTT_CLI_MSG_PUBLISH_TOPIC,
+	//					        		txt,
+	//					        		Number(process.env.MQTT_CLI_MSG_PUBLISH_QOS) || 0,
+	//					        		(process.env.MQTT_CLI_MSG_PUBLISH_RETAINED === 'true')
+	//					        	);
 
-//								} else {
-//									robot.messageRoom(room, txt);
-//								}
+	//							} else {
+	//								robot.messageRoom(room, txt);
+	//							}
 							}
-							conversations[room][user].directMessage = isDirectMessage(res);
-							conversations[room][user].resp = resp2;
+							conversations[room][user].resp = resp;
 							conversations[room][user].last = Date.now();
 							conversations[room][user].timeoutWarning = false;
+
+							if (conversations[room][user].resp.context.lisaContext && conversations[room][user].resp.context.lisaContext.endFlow) {
+								// Fin du flow demandee
+								// Traitement des parametres
+								var lisaContext = conversations[room][user].resp.context.lisaContext;
+								
+								if (lisaContext.appType === "web" && lisaContext.appStatus === "new" && lisaContext.devops && lisaContext.appName) {
+									res.reply("Requesting project " + lisaContext.appName + " creation...");
+
+									var payload = {
+									    method:"POST",
+									    url: process.env.HUBOT_ADOP_URL 
+											+ process.env.HUBOT_WATSON_CONVERSATION_JENKINS_PROJECT_CREATION_URL + lisaContext.appName,
+									    credential: process.env.HUBOT_ADOP_USERNAME + ":" + process.env.HUBOT_ADOP_PASSWORD,
+									    headers: {
+									      "Content-Type":"application/json"
+									    }
+									  };
+
+									// Call to node-red api jenkins to create project
+									//robot.emit('mqtt:pub', msg, "lisa/status", "{button:" + video + ",value:1}");
+									robot.emit('adop:query', 
+										res,
+										process.env.HUBOT_NODE_RED_ENDPOINT_URL,
+										null,
+										JSON.stringify(payload),
+										function(err, res, body) {
+											if (body) {
+												res.reply("Done !");
+
+	//											res.reply("Requesting source generation...");
+											}
+										}
+									);
+
+									// Remove conversation flow
+									conversations[room][user] = null;
+								    delete conversations[room][user];
+								}
+							}
 						}, onError);
-				  	}, onError);
+					} else {
+						robot.logger.debug('>Conversation New conversation : ' + room + ' - ' + user);
+					    callConversationService('{}', function (resp) {
+					    	var cache = [];
+							robot.logger.debug('>Conversation resp : ' + JSON.stringify(resp, function(key, value) {
+							    if (typeof value === 'object' && value !== null) {
+							        if (cache.indexOf(value) !== -1) {
+							            // Circular reference found, discard key
+							            return;
+							        }
+							        // Store value in our collection
+							        cache.push(value);
+							    }
+							    return value;
+							}));
+							cache = null; // Enable garbage collection
+							var txt = getResponseText(resp.output.text);
+							if (txt.length > 0) {
+	//							if (directMessage) {
+									res.reply(txt);
+
+	//								mqtt.publishMessage(
+	//						        	process.env.MQTT_CLI_MSG_PUBLISH_TOPIC,
+	//					        		txt,
+	//					        		Number(process.env.MQTT_CLI_MSG_PUBLISH_QOS) || 0,
+	//					        		(process.env.MQTT_CLI_MSG_PUBLISH_RETAINED === 'true')
+	//					        	);
+
+	//							} else {
+	//								robot.messageRoom(room, txt);
+	//							}
+							}
+							conversations[room][user] = {"directMessage": isDirectMessage(res), "resp": resp, "timeoutWarning": false, "last": Date.now()};
+							var req_json = '{\"input\":{\"text\":\"' + 
+								text + 
+								'\"},\"context\":{\"conversation_id\":\"' + 
+								conversations[room][user].resp.context.conversation_id + 
+								'\",\"system\":{\"dialog_stack\":[\"root\"],\"dialog_turn_counter\": ' +
+								conversations[room][user].resp.context.system.dialog_turn_counter +
+								',\"dialog_request_counter\": ' +
+								conversations[room][user].resp.context.system.dialog_request_counter +
+								'}}}';
+							    
+							callConversationService(req_json, function (resp2) {
+								robot.logger.debug('>Conversation conv id : ' + conversations[room][user].resp.context.conversation_id + ', response text : ' + resp2.output.text);
+								var cache = [];
+								robot.logger.debug('>Conversation resp : ' + JSON.stringify(resp2, function(key, value) {
+								    if (typeof value === 'object' && value !== null) {
+								        if (cache.indexOf(value) !== -1) {
+								            // Circular reference found, discard key
+								            return;
+								        }
+								        // Store value in our collection
+								        cache.push(value);
+								    }
+								    return value;
+								}));
+								cache = null; // Enable garbage collection
+								var txt = getResponseText(resp2.output.text);
+								if (txt.length > 0) {
+	//								if (directMessage) {
+										res.reply(txt);
+
+	//									mqtt.publishMessage(
+	//							        	process.env.MQTT_CLI_MSG_PUBLISH_TOPIC,
+	//						        		txt,
+	//						        		Number(process.env.MQTT_CLI_MSG_PUBLISH_QOS) || 0,
+	//						        		(process.env.MQTT_CLI_MSG_PUBLISH_RETAINED === 'true')
+	//						        	);
+
+	//								} else {
+	//									robot.messageRoom(room, txt);
+	//								}
+								}
+								conversations[room][user].directMessage = isDirectMessage(res);
+								conversations[room][user].resp = resp2;
+								conversations[room][user].last = Date.now();
+								conversations[room][user].timeoutWarning = false;
+							}, onError);
+					  	}, onError);
+					}
 				}
 			}
 		});
