@@ -341,15 +341,16 @@ module.exports = function(robotAdapter) {
 					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
 					    attachments: [
 					        {
-					            fallback: "Projet <" + jsonMessage.full_url + "|" + jsonMessage.projectName + "> : " +  jsonMessage.jobName +" est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+					            fallback: "Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> : <" +  jsonMessage.full_url + "|" + jsonMessage.jobName + "> est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
 					            mrkdwn_in: [
-					                "text"
+					                "text",
+					                "title"
 					            ],
 					            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
-					            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
-					            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet " + jsonMessage.projectName + " - " + jsonMessage.jobName,
-					            title_link: jsonMessage.full_url,
-					            footer: "<" + jsonMessage.full_url + "|Jenkins ADOP>",
+					            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
+					            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " <" + jsonMessage.full_url + "console" + "|[Console]>",
+					            //title_link: jsonMessage.full_url,
+					            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
 					            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
 					            ts: Date.now()/1000
 					        }
