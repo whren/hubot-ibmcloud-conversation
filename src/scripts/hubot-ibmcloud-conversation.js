@@ -58,7 +58,7 @@ function conversationTimeoutChecker() {
     		var currentIdle = Date.now() - conversations[room][user].last;
 
     		if (currentIdle < conversationTimeout && currentIdle >= (conversationTimeout - (conversationTimeout / 4)) && !conversations[room][user].timeoutWarning) {
-    			robot.messageRoom(room, "Je vous ai perdu... ?");
+    			robot.messageRoom(room, "@" + user + ": Je vous ai perdu... ?");
     			conversations[room][user].timeoutWarning = true;
     		} else if (currentIdle >= conversationTimeout) {
     			// If timeout has been reached
