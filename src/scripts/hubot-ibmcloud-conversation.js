@@ -340,6 +340,7 @@ module.exports = function(robotAdapter) {
 
 				if (jsonMessage) {
 					var ts = Date.now()/1000;
+					var existing = false;
 
 					if (!notifications[jsonMessage.full_url]) {
 						notifications[jsonMessage.full_url] = {
@@ -347,6 +348,7 @@ module.exports = function(robotAdapter) {
 						};
 					} else {
 						ts = notifications[jsonMessage.full_url].ts;
+						existing = true;
 					}
 
 					var attachments = {
@@ -372,9 +374,21 @@ module.exports = function(robotAdapter) {
 					    as_user: true
 					};
 
-					attachments.ts = notifications[jsonMessage.full_url].ts;
+					if (existing) {
+						attachments.ts = notifications[jsonMessage.full_url].ts;
+						var reqbody;
 
-					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, attachments);
+						reqbody = JSON.stringify(attachments);
+
+						robot.http("https://slack.com/api/chat.update").header("Content-Type", "application/json").post(reqbody)(function(err, res, body) {
+						  if (res.statusCode === 200) {
+						    return;
+						  }
+						  return robot.logger.error("Error!", res.statusCode, body);
+						});
+					} else  {
+						robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, attachments);
+					}
 				} else {
 	//				robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
 					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
