@@ -15,6 +15,9 @@ var conversationTimeout = env.conversation_timeout || 60000;
 // conversations data holder
 var conversations = {};
 
+// notifications holder
+var notifications = {};
+
 // Conversations timeout checker
 setTimeout(conversationTimeoutChecker, conversationTimeoutCheck);
 
@@ -336,11 +339,20 @@ module.exports = function(robotAdapter) {
 				} catch (error) {}
 
 				if (jsonMessage) {
-					var timestamp = Date.now()/1000;
+					var ts = Date.now()/1000;
 
-					var sentMessage = robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, {
+					if (!notifications[jsonMessage.full_url]) {
+						notifications[jsonMessage.full_url] = {
+							ts: ts
+						};
+					} else {
+						ts = notifications[jsonMessage.full_url].ts;
+					}
+
+					var attachments = {
 					    token: process.env.HUBOT_SLACK_TOKEN,
 					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
+					    text: "",
 					    attachments: [
 					        {
 					            fallback: "Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> : <" +  jsonMessage.full_url + "|" + jsonMessage.jobName + "> est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
@@ -354,16 +366,15 @@ module.exports = function(robotAdapter) {
 					            //title_link: jsonMessage.full_url,
 					            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
 					            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
-					            ts: timestamp
+					            ts: ts
 					        }
 					    ],
 					    as_user: true
-					});
+					};
 
-					// keep information needed in order to edit the message
-					if (sentMessage) {
-						robot.logger.debug("Message posted id : " + sentMessage.message.id);
-					}
+					attachments.ts = notifications[jsonMessage.full_url].ts;
+
+					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, attachments);
 				} else {
 	//				robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
 					robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
