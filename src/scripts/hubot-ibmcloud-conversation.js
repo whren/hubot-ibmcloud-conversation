@@ -380,11 +380,12 @@ module.exports = function(robotAdapter) {
 						attachments.ts = notifications[jsonMessage.full_url].ts;
 						var reqbody;
 
-						reqbody = JSON.stringify(attachments);
+						//reqbody = JSON.stringify(attachments);
 
-						robot.logger.debug("Request boy of notification for jsonMessage.full_url : " + reqbody);
+						//robot.logger.debug("Request boy of notification for jsonMessage.full_url : " + reqbody);
+						robot.logger.debug("Request boy of notification for jsonMessage.full_url : " + JSON.stringify(attachments));
 
-						robot.http("https://slack.com/api/chat.update").header("Content-Type", "application/json").post(reqbody)(function(err, res, body) {
+						robot.http("https://slack.com/api/chat.update").header("Content-Type", "application/json").post(attachments)(function(err, res, body) {
 						  if (res.statusCode === 200) {
 						  	robot.logger.debug("Response of notification for jsonMessage.full_url : " + body);
 						    return;
