@@ -355,7 +355,7 @@ module.exports = function(robotAdapter) {
 
 					var attachments = {
 					    token: process.env.HUBOT_SLACK_TOKEN,
-					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
+					    channel: encodeURIComponent(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL),
 					    text: "",
 					    attachments: [
 					        {
@@ -364,7 +364,7 @@ module.exports = function(robotAdapter) {
 					                "text",
 					                "title"
 					            ],
-					            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
+					            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : encodeURIComponent("#439FE0"))),
 					            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
 					            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
 					            //title_link: jsonMessage.full_url,
@@ -384,7 +384,7 @@ module.exports = function(robotAdapter) {
 
 						robot.logger.debug("Request boy of notification for jsonMessage.full_url : " + reqbody);
 
-						robot.http("https://slack.com/api/chat.update").header("Content-Type", "application/json").post(encodeURIComponent(reqbody))(function(err, res, body) {
+						robot.http("https://slack.com/api/chat.update").header("Content-Type", "application/json").post(reqbody)(function(err, res, body) {
 						  if (res.statusCode === 200) {
 						  	robot.logger.debug("Response of notification for jsonMessage.full_url : " + body);
 						    return;
