@@ -351,6 +351,8 @@ module.exports = function(robotAdapter) {
 						existing = true;
 					}
 
+					robot.logger.debug("Notification for jsonMessage.full_url : " + JSON.stringify(notifications[jsonMessage.full_url]) + (existing ? " (existing)" : ""));
+
 					var attachments = {
 					    token: process.env.HUBOT_SLACK_TOKEN,
 					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
@@ -380,8 +382,11 @@ module.exports = function(robotAdapter) {
 
 						reqbody = JSON.stringify(attachments);
 
+						robot.logger.debug("Request boy of notification for jsonMessage.full_url : " + reqbody);
+
 						robot.http("https://slack.com/api/chat.update").header("Content-Type", "application/json").post(reqbody)(function(err, res, body) {
 						  if (res.statusCode === 200) {
+						  	robot.logger.debug("Response of notification for jsonMessage.full_url : " + body);
 						    return;
 						  }
 						  return robot.logger.error("Error!", res.statusCode, body);
