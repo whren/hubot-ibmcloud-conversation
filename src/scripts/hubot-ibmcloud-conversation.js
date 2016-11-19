@@ -378,6 +378,7 @@ module.exports = function(robotAdapter) {
 
 					if (existing) {
 						attachments.ts = notifications[jsonMessage.full_url].ts;
+/*
 						var reqbody;
 
 						reqbody = JSON.stringify(attachments);
@@ -390,6 +391,11 @@ module.exports = function(robotAdapter) {
 						    return;
 						  }
 						  return robot.logger.error("Error!", res.statusCode, body);
+						});
+*/
+						robot.adapter.client._apiCall('chat.update', attachments, function(res) {
+							robot.logger.debug("Response of notification for jsonMessage.full_url : " + res);
+						  	//return done(null);
 						});
 					} else  {
 						robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, attachments);
