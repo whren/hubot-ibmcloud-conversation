@@ -387,7 +387,9 @@ module.exports = function(robotAdapter) {
 								for (var i = 0; i < response.data.channels.length; i++) {
 									channel = response.data.channels[i];
 
-									if (channel.name === process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL) {
+									robot.logger.debug("Channel : " + channel.name);
+									if (channel.name.endsWith(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL)) {
+										robot.logger.debug("Found matching channel : " + channel.name);
 										targetChannel = channel;
 										break;
 									}
