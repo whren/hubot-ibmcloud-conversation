@@ -394,7 +394,7 @@ module.exports = function(robotAdapter) {
 											channel = res.channels[i];
 
 											robot.logger.debug("Channel : " + channel.name);
-											if (channel.name.endsWith(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL)) {
+											if (process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL.endsWith(channel.name)) {
 												robot.logger.debug("Found matching channel : " + channel.name);
 												targetChannel = channel;
 												break;
@@ -427,7 +427,7 @@ module.exports = function(robotAdapter) {
 //						robot.logger.debug("robot.adapter.client.web.chat.update : " + robot.adapter.client.web.chat.update);
 						robot.adapter.client.web.chat.update(
 							ts,
-							targetChannel.id,
+							(targetChannel.id ? targetChannel.id : null),
 							"",
 							{
 								attachments: [
