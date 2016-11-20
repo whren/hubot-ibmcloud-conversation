@@ -380,18 +380,24 @@ module.exports = function(robotAdapter) {
 						attachments.ts = notifications[jsonMessage.full_url].ts;
 						var targetChannel;
 
-						robot.adapter.client.web.channels.list(function (error, response) {
-							if (response.data && response.data.channels) {
-								var channel;
+						robot.adapter.client.web.channels.list({}, function (err, res) {
+							if (err) {
+									robot.logger.error("Error occurs editing message : " + err);
+							} else {
+								if (!res.ok) {
+									if (res.data && res.data.channels) {
+										var channel;
 
-								for (var i = 0; i < response.data.channels.length; i++) {
-									channel = response.data.channels[i];
+										for (var i = 0; i < res.data.channels.length; i++) {
+											channel = res.data.channels[i];
 
-									robot.logger.debug("Channel : " + channel.name);
-									if (channel.name.endsWith(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL)) {
-										robot.logger.debug("Found matching channel : " + channel.name);
-										targetChannel = channel;
-										break;
+											robot.logger.debug("Channel : " + channel.name);
+											if (channel.name.endsWith(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL)) {
+												robot.logger.debug("Found matching channel : " + channel.name);
+												targetChannel = channel;
+												break;
+											}
+										}
 									}
 								}
 							}
