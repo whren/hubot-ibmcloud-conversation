@@ -399,7 +399,7 @@ module.exports = function(robotAdapter) {
 //						robot.logger.debug("robot.adapter.client.web.chat.update : " + robot.adapter.client.web.chat.update);
 						robot.adapter.client.web.chat.update(
 							ts,
-							process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
+							encodeURIComponent(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL),
 							"",
 							{
 								attachments: [
