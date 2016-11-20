@@ -394,7 +394,7 @@ module.exports = function(robotAdapter) {
 						});
 */
 						robot.logger.debug("Request notification for " + jsonMessage.full_url);
-						robot.adapter.client.update(
+						robot.adapter.client.chat.update(
 							ts,
 							process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
 							"",
