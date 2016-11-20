@@ -394,13 +394,9 @@ module.exports = function(robotAdapter) {
 						});
 */
 						robot.logger.debug("Request notification for " + jsonMessage.full_url);
-//						robot.logger.debug("robot.adapter.client : " + robot.adapter.client);
-//						robot.logger.debug("robot.adapter.client.chat : " + robot.adapter.client.chat);
-						robot.logger.debug("robot.adapter.client.web : " + robot.adapter.client.web);
-						robot.logger.debug("robot.adapter.client.web : " + robot.adapter.client.web.chat);
-						robot.logger.debug("robot.adapter.client.web : " + robot.adapter.client.web.chat.update);
-//						robot.logger.debug("robot.adapter.client.client : " + robot.adapter.client.client);
-//						robot.logger.debug("robot.adapter.client.client.chat : " + robot.adapter.client.client.chat);
+//						robot.logger.debug("robot.adapter.client.web : " + robot.adapter.client.web);
+//						robot.logger.debug("robot.adapter.client.web.chat : " + robot.adapter.client.web.chat);
+//						robot.logger.debug("robot.adapter.client.web.chat.update : " + robot.adapter.client.web.chat.update);
 						robot.adapter.client.web.chat.update(
 							ts,
 							process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
@@ -424,8 +420,16 @@ module.exports = function(robotAdapter) {
 							    ],
 							    as_user: true
 							},
-							function() {
-								robot.logger.debug("Attachment " + ts + " edited with success !");
+							function(err, res) {
+								if (err) {
+									robot.logger.error("Error occurs editing message : " + err);
+								} else {
+									if (!res.ok) {
+										robot.logger.error("Editing message error result : " + res.error);
+									} else {
+										robot.logger.debug("Attachment " + ts + " edited with success ! (" + res + ")");
+									}
+								}
 							});
 //						robot.adapter.client._apiCall('chat.update', attachments, function(res) {
 //							robot.logger.debug("Response of notification for jsonMessage.full_url : " + res);
