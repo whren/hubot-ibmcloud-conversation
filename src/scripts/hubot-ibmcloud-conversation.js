@@ -355,7 +355,7 @@ module.exports = function(robotAdapter) {
 
 					var attachments = {
 					    token: process.env.HUBOT_SLACK_TOKEN,
-					    channel: encodeURIComponent(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL),
+					    channel: process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
 					    text: "",
 					    attachments: [
 					        {
@@ -364,7 +364,7 @@ module.exports = function(robotAdapter) {
 					                "text",
 					                "title"
 					            ],
-					            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : encodeURIComponent("#439FE0"))),
+					            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
 					            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
 					            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
 					            //title_link: jsonMessage.full_url,
@@ -393,10 +393,37 @@ module.exports = function(robotAdapter) {
 						  return robot.logger.error("Error!", res.statusCode, body);
 						});
 */
-						robot.adapter.client._apiCall('chat.update', attachments, function(res) {
-							robot.logger.debug("Response of notification for jsonMessage.full_url : " + res);
+						robot.logger.debug("Request notification for " + jsonMessage.full_url);
+						robot.adapter.client.update(
+							ts,
+							process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
+							"",
+							{
+								attachments: [
+							        {
+							            fallback: "Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> : <" +  jsonMessage.full_url + "|" + jsonMessage.jobName + "> est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+							            mrkdwn_in: [
+							                "text",
+							                "title"
+							            ],
+							            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
+							            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
+							            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
+							            //title_link: jsonMessage.full_url,
+							            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
+							            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
+							            ts: ts
+							        }
+							    ],
+							    as_user: true
+							},
+							function() {
+								robot.logger.debug("Attachment " + ts + " edited with success !");
+							});
+//						robot.adapter.client._apiCall('chat.update', attachments, function(res) {
+//							robot.logger.debug("Response of notification for jsonMessage.full_url : " + res);
 						  	//return done(null);
-						});
+//						});
 					} else  {
 						robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, attachments);
 					}
