@@ -381,9 +381,18 @@ module.exports = function(robotAdapter) {
 						var targetChannel;
 
 						robot.adapter.client.web.channels.list(function (error, response) {
-						  targetChannel = response.data.find(function(channel) {
-							return channel.name === process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL;
-						  });
+							if (response.data && response.data.channels) {
+								var channel;
+
+								for (var i = 0; i < response.data.channels.length; i++) {
+									channel = response.data.channels[i];
+
+									if (channel.name === process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL) {
+										targetChannel = channel;
+										break;
+									}
+								}
+							}
 						});
 /*
 						var reqbody;
