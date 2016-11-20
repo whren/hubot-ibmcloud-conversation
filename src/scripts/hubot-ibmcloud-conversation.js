@@ -466,7 +466,25 @@ module.exports = function(robotAdapter) {
 						  	//return done(null);
 //						});
 					} else  {
-						robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, attachments);
+//						robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, attachments);
+
+						robot.adapter.client.web.chat.postMessage(
+							process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL,
+							"",
+							attachments,
+							function(err, res) {
+								if (err) {
+									robot.logger.error("Error occurs posting message : " + err);
+								} else {
+									if (!res.ok) {
+										robot.logger.error("Posting message error result : " + res.error);
+									} else {
+										notifications[jsonMessage.full_url].ts = res.ts;
+										robot.logger.debug("Attachment " + res.ts + " posted with success ! (" + res + ")");
+									}
+								}
+							}
+						);
 					}
 				} else {
 	//				robot.messageRoom(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL, "> [" + message.destinationName + "] " + message.payloadString);
