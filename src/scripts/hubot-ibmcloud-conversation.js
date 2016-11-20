@@ -387,11 +387,11 @@ module.exports = function(robotAdapter) {
 								if (!res.ok) {
 									robot.logger.error("Listing channels error result : " + res.error);
 								} else {
-									if (res.data && res.data.channels) {
+									if (res.channels) {
 										var channel;
 
-										for (var i = 0; i < res.data.channels.length; i++) {
-											channel = res.data.channels[i];
+										for (var i = 0; i < res.channels.length; i++) {
+											channel = res.channels[i];
 
 											robot.logger.debug("Channel : " + channel.name);
 											if (channel.name.endsWith(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL)) {
@@ -400,6 +400,8 @@ module.exports = function(robotAdapter) {
 												break;
 											}
 										}
+									} else {
+										robot.logger.warn("No channels exists");
 									}
 								}
 							}
