@@ -382,9 +382,11 @@ module.exports = function(robotAdapter) {
 
 						robot.adapter.client.web.channels.list({}, function (err, res) {
 							if (err) {
-									robot.logger.error("Error occurs editing message : " + err);
+								robot.logger.error("Error occurs editing message : " + err);
 							} else {
 								if (!res.ok) {
+									robot.logger.error("Listing channels error result : " + res.error);
+								} else {
 									if (res.data && res.data.channels) {
 										var channel;
 
