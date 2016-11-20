@@ -378,6 +378,13 @@ module.exports = function(robotAdapter) {
 
 					if (existing) {
 						attachments.ts = notifications[jsonMessage.full_url].ts;
+						var targetChannel;
+
+						robot.adapter.client.web.channels.list(function (error, response) {
+						  targetChannel = response.data.find(function(channel) {
+							return channel.name === process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL;
+						  });
+						});
 /*
 						var reqbody;
 
@@ -399,7 +406,7 @@ module.exports = function(robotAdapter) {
 //						robot.logger.debug("robot.adapter.client.web.chat.update : " + robot.adapter.client.web.chat.update);
 						robot.adapter.client.web.chat.update(
 							ts,
-							encodeURIComponent(process.env.HUBOT_ADOP_NOTIFICATION_CHANNEL),
+							targetChannel.id,
 							"",
 							{
 								attachments: [
