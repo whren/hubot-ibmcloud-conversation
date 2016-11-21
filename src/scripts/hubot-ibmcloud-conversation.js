@@ -94,9 +94,9 @@ function conversationTimeoutChecker() {
  */
 function messageTimeoutChecker() {
     for (var url in messages) {
-		var currentIdle = Date.now() - messages[url].ts;
+		var currentIdle = (Date.now()/1000) - messages[url].ts;
 
-		if (currentIdle >= conversationTimeout) {
+		if (currentIdle >= messageTimeout) {
 			// If timeout has been reached
         	robot.logger.info('>Message timeout checker, timed out for ' + url);
             // Remove in memory chunk
