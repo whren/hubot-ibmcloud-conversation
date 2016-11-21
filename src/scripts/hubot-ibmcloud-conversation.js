@@ -455,7 +455,7 @@ module.exports = function(robotAdapter) {
 															if (!res.ok) {
 																robot.logger.error("Editing message error result : " + res.error);
 															} else {
-																robot.logger.debug("Attachment " + ts + " edited with success ! (" + res + ")");
+																robot.logger.debug("Attachment " + ts + " edited with success ! (" + res.ts + ")");
 															}
 														}
 													}
