@@ -372,7 +372,6 @@ module.exports = function(robotAdapter) {
 							ts: ts
 						};
 					} else {
-						ts = messages[jsonMessage.full_url].ts;
 						existing = true;
 					}
 
@@ -402,7 +401,7 @@ module.exports = function(robotAdapter) {
 					};
 
 					if (existing) {
-						attachments.ts = messages[jsonMessage.full_url].ts;
+//						attachments.ts = messages[jsonMessage.full_url].ts;
 						var targetChannel;
 
 						robot.adapter.client.web.channels.list({}, function (err, res) {
@@ -426,7 +425,7 @@ module.exports = function(robotAdapter) {
 
 												robot.logger.debug("Request message update for " + jsonMessage.full_url);
 												robot.adapter.client.web.chat.update(
-													ts,
+													messages[jsonMessage.full_url].ts,
 													(targetChannel.id ? targetChannel.id : null),
 													"",
 													{
@@ -455,7 +454,8 @@ module.exports = function(robotAdapter) {
 															if (!res.ok) {
 																robot.logger.error("Editing message error result : " + res.error);
 															} else {
-																robot.logger.debug("Attachment " + ts + " edited with success ! (" + res.ts + ")");
+																robot.logger.debug("Attachment " + messages[jsonMessage.full_url].ts + " edited with success ! (" + res.ts + ")");
+																messages[jsonMessage.full_url].ts = res.ts;
 															}
 														}
 													}
