@@ -7,6 +7,8 @@ var settings = {
 	conversation_workspace_id: process.env.HUBOT_WATSON_CONVERSATION_WORKSPACE_ID,
 	conversation_timeout_check: process.env.HUBOT_WATSON_CONVERSATION_TIMEOUT_CHECK,
 	conversation_timeout: process.env.HUBOT_WATSON_CONVERSATION_TIMEOUT,
+	message_timeout_check: process.env.HUBOT_SLACK_MESSAGE_TIMEOUT_CHECK,
+	message_timeout: process.env.HUBOT_SLACK_MESSAGE_TIMEOUT
 
 /*
 	mqtt_cli_will_msg_publish_topic: ,
