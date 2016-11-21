@@ -15,7 +15,7 @@ var conversationTimeout = env.conversation_timeout || 60000;
 // conversations data holder
 var conversations = {};
 
-// notifications holder
+// messages holder
 var messages = {};
 var messageTimeoutCheck = env.message_timeout_check || 30000;
 var messageTimeout = env.message_timeout || 60000;
@@ -367,16 +367,16 @@ module.exports = function(robotAdapter) {
 					var ts = Date.now()/1000;
 					var existing = false;
 
-					if (!notifications[jsonMessage.full_url]) {
-						notifications[jsonMessage.full_url] = {
+					if (!messages[jsonMessage.full_url]) {
+						messages[jsonMessage.full_url] = {
 							ts: ts
 						};
 					} else {
-						ts = notifications[jsonMessage.full_url].ts;
+						ts = messages[jsonMessage.full_url].ts;
 						existing = true;
 					}
 
-					robot.logger.debug("Notification for jsonMessage.full_url : " + JSON.stringify(notifications[jsonMessage.full_url]) + (existing ? " (existing)" : ""));
+					robot.logger.debug("Notification for jsonMessage.full_url : " + JSON.stringify(messages[jsonMessage.full_url]) + (existing ? " (existing)" : ""));
 
 					var attachments = {
 					    token: process.env.HUBOT_SLACK_TOKEN,
@@ -402,7 +402,7 @@ module.exports = function(robotAdapter) {
 					};
 
 					if (existing) {
-						attachments.ts = notifications[jsonMessage.full_url].ts;
+						attachments.ts = messages[jsonMessage.full_url].ts;
 						var targetChannel;
 
 						robot.adapter.client.web.channels.list({}, function (err, res) {
@@ -424,7 +424,7 @@ module.exports = function(robotAdapter) {
 												targetChannel = channel;
 
 
-												robot.logger.debug("Request notification for " + jsonMessage.full_url);
+												robot.logger.debug("Request message update for " + jsonMessage.full_url);
 												robot.adapter.client.web.chat.update(
 													ts,
 													(targetChannel.id ? targetChannel.id : null),
@@ -504,7 +504,7 @@ module.exports = function(robotAdapter) {
 									if (!res.ok) {
 										robot.logger.error("Posting message error result : " + res.error);
 									} else {
-										notifications[jsonMessage.full_url].ts = res.ts;
+										messages[jsonMessage.full_url].ts = res.ts;
 										robot.logger.debug("Attachment " + res.ts + " posted with success ! (" + res + ")");
 									}
 								}
