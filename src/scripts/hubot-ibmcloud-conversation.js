@@ -16,10 +16,14 @@ var conversationTimeout = env.conversation_timeout || 60000;
 var conversations = {};
 
 // notifications holder
-var notifications = {};
+var messages = {};
+var messageTimeoutCheck = env.message_timeout_check || 30000;
+var messageTimeout = env.message_timeout || 60000;
 
 // Conversations timeout checker
 setTimeout(conversationTimeoutChecker, conversationTimeoutCheck);
+// Message timeout checker
+setTimeout(messageTimeoutChecker, messageTimeoutCheck);
 
 // https://www.ibm.com/watson/developercloud/conversation/api/v1/
 var url = env.conversation_url + 
@@ -81,6 +85,27 @@ function conversationTimeoutChecker() {
     }
 
     setTimeout(conversationTimeoutChecker, conversationTimeoutCheck);
+}
+
+/**
+ * Check messages for timeout receiving.
+ * If any found, remove it.
+ * Set another function timeout.
+ */
+function messageTimeoutChecker() {
+    for (var url in messages) {
+		var currentIdle = Date.now() - messages[url].ts;
+
+		if (currentIdle >= conversationTimeout) {
+			// If timeout has been reached
+        	robot.logger.info('>Message timeout checker, timed out for ' + url);
+            // Remove in memory chunk
+            messages[url] = null;
+            delete messages[url];
+        }
+    }
+
+    setTimeout(messageTimeoutChecker, messageTimeoutCheck);
 }
 
 /**
@@ -382,7 +407,7 @@ module.exports = function(robotAdapter) {
 
 						robot.adapter.client.web.channels.list({}, function (err, res) {
 							if (err) {
-								robot.logger.error("Error occurs editing message : " + err);
+								robot.logger.error("Error occurs listing channels : " + err);
 							} else {
 								if (!res.ok) {
 									robot.logger.error("Listing channels error result : " + res.error);
