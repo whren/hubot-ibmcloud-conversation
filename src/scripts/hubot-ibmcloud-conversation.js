@@ -420,13 +420,13 @@ module.exports = function(robotAdapter) {
 					  		robot.logger.error("Joining channel error result : " + result.error);
 					  	} else {
 					  		// Invite bot user
-					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "user=" + robot.naùe)
+					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + robot.name)
 								.header("Content-Type", "application/json")
 								.post(JSON.stringify({}))(function(err, res, body) {
 							  if (res.statusCode === 200) {
 							  	robot.logger.debug("Response body of channels.invite : " + body);
 							  	var result = JSON.parse(body);
-							  	if (!result.ok) {
+							  	if (!result.ok && result.error !=== "already_in_channel") {
 							  		robot.logger.error("Inviting bot to channel error result : " + result.error);
 							  	} else {
 									var attachments = {
