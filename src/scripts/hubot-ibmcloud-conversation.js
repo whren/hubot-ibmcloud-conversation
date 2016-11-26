@@ -410,7 +410,9 @@ module.exports = function(robotAdapter) {
 
 					robot.logger.debug("Request body for channels.join : " + reqbody);
 
-					robot.http("https://slack.com/api/channels.join").header("Content-Type", "application/json").post(reqbody)(function(err, res, body) {
+					robot.http("https://slack.com/api/channels.join?token=process.env.HUBOT_SLACK_USER_TOKEN&name=" + encodeURIComponent(channelName))
+						.header("Content-Type", "application/json")
+						.post(JSON.stringify({}))(function(err, res, body) {
 					  if (res.statusCode === 200) {
 					  	robot.logger.debug("Response body of channels.join : " + body);
 					    return;
