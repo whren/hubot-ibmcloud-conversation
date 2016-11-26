@@ -403,7 +403,7 @@ module.exports = function(robotAdapter) {
 					// Ensure bot is in the channel
 					var reqbody = {
 						token: process.env.HUBOT_SLACK_USER_TOKEN,
-						name: channelName
+						name: encodeURIComponent(channelName)
 					};
 
 					reqbody = JSON.stringify(reqbody);
