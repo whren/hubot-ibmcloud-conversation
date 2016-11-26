@@ -426,7 +426,7 @@ module.exports = function(robotAdapter) {
 							  if (res.statusCode === 200) {
 							  	robot.logger.debug("Response body of channels.invite : " + body);
 							  	var result = JSON.parse(body);
-							  	if (!result.ok && result.error !=== "already_in_channel") {
+							  	if (!result.ok && result.error !== "already_in_channel") {
 							  		robot.logger.error("Inviting bot to channel error result : " + result.error);
 							  	} else {
 									var attachments = {
@@ -755,6 +755,7 @@ module.exports = function(robotAdapter) {
 								
 								if (lisaContext.appType === "web" && lisaContext.appStatus === "new" && lisaContext.devops && lisaContext.appName) {
 									res.reply("Requesting project " + lisaContext.appName + " creation...");
+									res.reply("Feedback will be sent to channel " + generateChannelName(lisaContext.appName));
 
 									var payload = {
 									    method:"POST",
