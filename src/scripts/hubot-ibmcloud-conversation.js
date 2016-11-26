@@ -401,6 +401,23 @@ module.exports = function(robotAdapter) {
 					var channelName = generateChannelName(jsonMessage.projectName);
 
 					// Ensure bot is in the channel
+					var reqbody = {
+						token: process.env.HUBOT_SLACK_USER_TOKEN,
+						name: channelName
+					};
+
+					reqbody = JSON.stringify(reqbody);
+
+					robot.logger.debug("Request body for channels.join : " + reqbody);
+
+					robot.http("https://slack.com/api/channels.join").header("Content-Type", "application/json").post(reqbody)(function(err, res, body) {
+					  if (res.statusCode === 200) {
+					  	robot.logger.debug("Response body of channels.join : " + body);
+					    return;
+					  }
+					  return robot.logger.error("Error!", res.statusCode, body);
+					});
+
 					robot.adapter.client.web.channels.join(channelName, function (err, res) {
 						if (err) {
 							robot.logger.error("Error occurs joining channel : " + err);
