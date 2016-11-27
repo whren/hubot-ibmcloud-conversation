@@ -420,7 +420,7 @@ module.exports = function(robotAdapter) {
 					  		robot.logger.error("Joining channel error result : " + result.error);
 					  	} else {
 					  		// Invite bot user
-					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + robot.adapter.client.getUserByName(robot.name).id)
+					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + robot.adapter.bot_id)
 								.header("Content-Type", "application/json")
 								.post(JSON.stringify({}))(function(err, res, body) {
 							  if (res.statusCode === 200) {
