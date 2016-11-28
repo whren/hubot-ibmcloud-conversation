@@ -289,7 +289,7 @@ module.exports = function(robotAdapter) {
 	robot = robotAdapter;
 	var botName = robot.name;
 
-	robot.adapter.client.on('authenticated', this.authenticated);
+	robot.adapter.client.on('authenticated', authenticated);
 
 	robot.logger.debug('>Conversation enable ? ' + env.conversation_enabled);
 
