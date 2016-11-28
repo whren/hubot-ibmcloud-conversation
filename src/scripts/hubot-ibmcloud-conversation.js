@@ -473,6 +473,12 @@ module.exports = function(robotAdapter) {
 
 					  		if (robot.brain.data && robot.brain.data.users) {
 					  			robot.logger.debug("robot.brain.data.users " + robot.brain.data.users);
+
+					  			for (var i = 0; i < robot.brain.data.users.length; i++) {
+					  				var user = robot.brain.data.users[i];
+					  				
+					  				robot.logger.debug("User : " + JSON.stringify(user));
+					  			}
 					  		}
 
 					  		if (robot.data && robot.data.users) {
