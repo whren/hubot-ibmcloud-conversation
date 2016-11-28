@@ -289,7 +289,7 @@ module.exports = function(robotAdapter) {
 	robot = robotAdapter;
 	var botName = robot.name;
 
-	robot.adapter.client.on('authenticated', authenticated);
+//	robot.adapter.client.on('authenticated', authenticated);
 
 	robot.logger.debug('>Conversation enable ? ' + env.conversation_enabled);
 
@@ -446,6 +446,20 @@ module.exports = function(robotAdapter) {
 							if (robot.adapter.bot_id) {
 					  			robot.logger.debug("robot.adapter.bot_id " + robot.adapter.bot_id);
 					  		}
+
+							if (robot.adapter.client.id) {
+					  			robot.logger.debug("robot.adapter.client.id " + robot.adapter.client.id);
+					  		}
+
+							if (robot.adapter.client.bot_id) {
+					  			robot.logger.debug("robot.adapter.client.bot_id " + robot.adapter.client.bot_id);
+					  		}
+
+					  		if (robot.adapter.client.users) {
+					  			robot.logger.debug("robot.adapter.client.users " + robot.adapter.client.users);
+					  		}
+
+
 
 					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + robot.adapter.bot_id)
 								.header("Content-Type", "application/json")
