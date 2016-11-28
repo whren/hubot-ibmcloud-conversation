@@ -459,6 +459,18 @@ module.exports = function(robotAdapter) {
 					  			robot.logger.debug("robot.adapter.client.users " + robot.adapter.client.users);
 					  		}
 
+					  		if (robot.brain.userForId) {
+					  			robot.logger.debug("robot.brain.userForId " + robot.brain.userForId);	
+					  		}
+
+					  		if (robot.brain.id) {
+					  			robot.logger.debug("robot.brain.id " + robot.brain.id);	
+					  		}
+
+					  		if (robot.brain.bot_id) {
+					  			robot.logger.debug("robot.brain.bot_id " + robot.brain.bot_id);	
+					  		}
+
 
 
 					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + robot.adapter.bot_id)
