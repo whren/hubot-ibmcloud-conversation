@@ -255,6 +255,15 @@ function generateChannelName(projectName) {
 	return null;
 }
 
+function authenticated(identity) {
+	var i, len, user;
+	robot.logger.debug('autheticated...');
+	for (i = 0, len = identity.users.length; i < len; i++) {
+        user = identity.users[i];
+        robot.logger.debug('user.id : ' + user.id + ', bot_id : ' + user.profile.bot_id);
+    }
+}
+
 //var orig_onSuccess = mqtt.onSuccess;
 
 /**
@@ -279,6 +288,8 @@ function generateChannelName(projectName) {
 module.exports = function(robotAdapter) {
 	robot = robotAdapter;
 	var botName = robot.name;
+
+	robot.adapter.client.on('authenticated', this.authenticated);
 
 	robot.logger.debug('>Conversation enable ? ' + env.conversation_enabled);
 
@@ -420,6 +431,22 @@ module.exports = function(robotAdapter) {
 					  		robot.logger.error("Joining channel error result : " + result.error);
 					  	} else {
 					  		// Invite bot user
+					  		if (robot.id) {
+					  			robot.logger.debug("robot.id " + robot.id);
+					  		}
+
+					  		if (robot.bot_id) {
+					  			robot.logger.debug("robot.bot_id " + robot.bot_id);
+					  		}
+
+					  		if (robot.adapter.id) {
+					  			robot.logger.debug("robot.adapter.id " + robot.adapter.id);
+					  		}
+
+							if (robot.adapter.bot_id) {
+					  			robot.logger.debug("robot.adapter.bot_id " + robot.adapter.bot_id);
+					  		}
+
 					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + robot.adapter.bot_id)
 								.header("Content-Type", "application/json")
 								.post(JSON.stringify({}))(function(err, res, body) {
