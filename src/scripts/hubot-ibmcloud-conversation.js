@@ -471,6 +471,7 @@ module.exports = function(robotAdapter) {
 					  			robot.logger.debug("robot.brain.bot_id " + robot.brain.bot_id);	
 					  		}
 
+
 					  		if (robot.brain.data && robot.brain.data.users) {
 					  			robot.logger.debug("robot.brain.data.users " + JSON.stringify(robot.brain.data.users));
 					  			robot.logger.debug("robot.brain.data.users length : " + robot.brain.data.users.length);
@@ -490,6 +491,22 @@ module.exports = function(robotAdapter) {
 //					  			robot.logger.debug("robot brain : " + JSON.stringify(robot.brain));
 					  			var cache = [];
 								robot.logger.debug('robot brain : ' + JSON.stringify(robot.brain, function(key, value) {
+								    if (typeof value === 'object' && value !== null) {
+								        if (cache.indexOf(value) !== -1) {
+								            // Circular reference found, discard key
+								            return;
+								        }
+								        // Store value in our collection
+								        cache.push(value);
+								    }
+								    return value;
+								}));
+								cache = null; // Enable garbage collection
+					  		}
+
+					  		if (robot.data) {
+					  			var cache = [];
+								robot.logger.debug('robot data : ' + JSON.stringify(robot.data, function(key, value) {
 								    if (typeof value === 'object' && value !== null) {
 								        if (cache.indexOf(value) !== -1) {
 								            // Circular reference found, discard key
