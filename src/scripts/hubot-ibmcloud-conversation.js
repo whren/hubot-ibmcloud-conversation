@@ -505,7 +505,7 @@ module.exports = function(robotAdapter) {
 
 
 								robot.logger.debug('brain methods : ' + Object.getOwnPropertyNames(robot.brain).filter(function (p) {
-								    return typeof Math[p] === 'function';
+								    return typeof p === 'function';
 								}));
 					  		}
 
