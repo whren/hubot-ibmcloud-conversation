@@ -472,7 +472,8 @@ module.exports = function(robotAdapter) {
 					  		}
 
 					  		if (robot.brain.data && robot.brain.data.users) {
-					  			robot.logger.debug("robot.brain.data.users " + robot.brain.data.users);
+					  			robot.logger.debug("robot.brain.data.users " + JSON.stringify(robot.brain.data.users));
+					  			robot.logger.debug("robot.brain.data.users length : " + robot.brain.data.users.length);
 
 					  			for (var i = 0; i < robot.brain.data.users.length; i++) {
 					  				var user = robot.brain.data.users[i];
@@ -483,6 +484,10 @@ module.exports = function(robotAdapter) {
 
 					  		if (robot.data && robot.data.users) {
 					  			robot.logger.debug("robot.data.users " + robot.data.users);	
+					  		}
+
+					  		if (robot.brain) {
+					  			robot.logger.debug("robot brain : " + JSON.stringigy(robot.brain));
 					  		}
 
 
