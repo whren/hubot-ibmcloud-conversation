@@ -539,6 +539,68 @@ module.exports = function(robotAdapter) {
 */
 							var channel_id = result.channel.id;
 
+							// Si le channel est archivé
+							if (result.channel.is_archived) {
+								var channel_unarchive = new Promise(
+									function(resolve, reject) {
+										robot.http("https://slack.com/api/channels.unarchive?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + channel_id)
+											.header("Content-Type", "application/json")
+											.post(JSON.stringify({}))(function(err, res, body) {
+											if (err) {
+												reject(err, null);
+											} else {
+												if (res.statusCode === 200) {
+											  		robot.logger.debug("Response body of channels.unarchive : " + body);
+											  		
+											  		var result = JSON.parse(body);
+												  	if (!result.ok) {
+												  		robot.logger.error("Unarchiving channel error result : " + result.error);
+												  		reject(null, result);
+												  	} else {
+												  		resolve(null, result);
+												  	}
+											  	}
+											}
+										});
+/*
+										robot.adapter.client.web.channels.unarchive(
+											{
+												channel: channel_id
+											},
+											function(err, res) {
+												if (err) {
+													robot.logger.error("Error occurs unarchiving channel " + result.channel.name + " : " + err);
+													reject(err, null);
+												} else {
+													if (!res.ok) {
+														robot.logger.error("Unarchiving channel " + result.channel.name + " error result : " + res.error);
+														reject(null, res);
+													} else {
+														resolve(res);
+													}
+												}
+											}
+										);
+*/
+									}
+								);
+
+								channel_unarchive.then(
+									function(res) {
+										robot.logger.debug("Channel " + result.channel.name + " unarchived OK");
+									}
+								).catch(
+									function(err, res) {
+										if (err) {
+											robot.logger.error("Error occurs unarchiving channel " + result.channel.name + " : " + err);
+										} else {
+											robot.logger.error("Unarchiving channel " + result.channel.name + " error result : " + res.error);
+										}
+									}
+								);
+							}
+
+
 							var bot_id;
 							robot.adapter.client.web.users.list(
 								{
@@ -647,6 +709,175 @@ module.exports = function(robotAdapter) {
 																			messages[jsonMessage.full_url].ts = res.ts;
 																			robot.logger.debug("Attachment " + res.ts + " posted with success ! (" + res + ")");
 																		}
+																	}
+																}
+															);
+														}
+
+
+														// Si le message concerne le destroy du projet
+														if (jsonMessage.jobName === "jhipster-destroy-trigger" && jsonMessage.buildStatus === "SUCCCES" && jsonMessage.statut === "Terminé") {
+															// List everyone in channel
+															var channel_info = new Promise(
+																function(resolve, reject) {
+																	robot.adapter.client.web.channel.info(
+																		channel_id,
+																		function(err, res) {
+																			if (err) {
+																				robot.logger.error("Error occurs getting channel info : " + err);
+																				reject(err, null);
+																			} else {
+																				if (!res.ok) {
+																					robot.logger.error("Channel info error result : " + res.error);
+																					reject(null, res);
+																				} else {
+																					resolve(res);
+																				}
+																			}
+																		}
+																	);
+																}
+															);
+
+															var members = [];
+															channel_info.then(
+																function(res) {
+																	for (var i = 0; i < res.channel.members.length; i++) {
+																		var member = res.channel.members[i];
+//																		if (member.name !== robot.name) {
+																			members.push(member);
+//																		}
+																	}
+																}
+															).catch(
+																function(err, res) {
+																	if (err) {
+																		robot.logger.error("Error occurs gett channel " + result.channel.name + " info : " + err);
+																	} else {
+																		robot.logger.error("Getting channel " + result.channel.name + " info error result : " + res.error);
+																	}
+																}
+															);
+
+															// Kick members
+															for (var i = 0; i < members.length; i++) {
+																var channel_kick = new Promise(
+																	function(resolve, reject) {
+																		robot.http("https://slack.com/api/channels.kick?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + channel_id + "&user=" + members[i])
+																			.header("Content-Type", "application/json")
+																			.post(JSON.stringify({}))(function(err, res, body) {
+																			if (err) {
+																				reject(err, null);
+																			} else {
+																				if (res.statusCode === 200) {
+																			  		robot.logger.debug("Response body of channels.kick : " + body);
+																			  		
+																			  		var result = JSON.parse(body);
+																				  	if (!result.ok) {
+																				  		robot.logger.error("Kicking from channel error result : " + result.error);
+																				  		reject(null, result);
+																				  	} else {
+																				  		resolve(null, result);
+																				  	}
+																			  	}
+																			}
+																		});
+																	}
+																);
+
+																channel_kick.then(
+																	function(res) {
+																		robot.logger.debug("User kicked from Channel " + result.channel.name + " OK");
+																	}
+																).catch(
+																	function(err, res) {
+																		if (err) {
+																			robot.logger.error("Error occurs kicking from channel " + result.channel.name + " : " + err);
+																		} else {
+																			robot.logger.error("Kick from channel " + result.channel.name + " error result : " + res.error);
+																		}
+																	}
+																);
+															}
+
+															// Archive channel
+															var channel_archive = new Promise(
+																function(resolve, reject) {
+																	robot.http("https://slack.com/api/channels.archive?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + channel_id)
+																		.header("Content-Type", "application/json")
+																		.post(JSON.stringify({}))(function(err, res, body) {
+																		if (err) {
+																			reject(err, null);
+																		} else {
+																			if (res.statusCode === 200) {
+																		  		robot.logger.debug("Response body of channels.archive : " + body);
+																		  		
+																		  		var result = JSON.parse(body);
+																			  	if (!result.ok) {
+																			  		robot.logger.error("Archiving channel error result : " + result.error);
+																			  		reject(null, result);
+																			  	} else {
+																			  		resolve(null, result);
+																			  	}
+																		  	}
+																		}
+																	});
+																}
+															);
+
+															channel_archive.then(
+																function(res) {
+																	robot.logger.debug("Channel " + result.channel.name + " archived OK");
+																}
+															).catch(
+																function(err, res) {
+																	if (err) {
+																		robot.logger.error("Error occurs archiving channel " + result.channel.name + " : " + err);
+																	} else {
+																		robot.logger.error("Archiving channel " + result.channel.name + " error result : " + res.error);
+																	}
+																}
+															);
+
+															// Leave channel
+															var channel_leave = new Promise(
+																function(resolve, reject) {
+																	robot.http("https://slack.com/api/channels.leave?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + channel_id)
+																		.header("Content-Type", "application/json")
+																		.post(JSON.stringify({}))(function(err, res, body) {
+																		if (err) {
+																			reject(err, null);
+																		} else {
+																			if (res.statusCode === 200) {
+																		  		robot.logger.debug("Response body of channels.leave : " + body);
+																		  		
+																		  		var result = JSON.parse(body);
+																			  	if (!result.ok) {
+																			  		robot.logger.error("Leaving channel error result : " + result.error);
+																			  		reject(null, result);
+																			  	} else {
+																			  		resolve(null, result);
+																			  	}
+																		  	}
+																		}
+																	});
+																}
+															);
+
+															channel_leave.then(
+																function(res) {
+																	if (res.not_in_channel) {
+																		robot.logger.debug("Not in channel " + result.channel.name);
+																	} else {
+																		robot.logger.debug("Channel " + result.channel.name + " leaved OK");
+																	}
+																}
+															).catch(
+																function(err, res) {
+																	if (err) {
+																		robot.logger.error("Error occurs leaving channel " + result.channel.name + " : " + err);
+																	} else {
+																		robot.logger.error("Leaving channel " + result.channel.name + " error result : " + res.error);
 																	}
 																}
 															);
