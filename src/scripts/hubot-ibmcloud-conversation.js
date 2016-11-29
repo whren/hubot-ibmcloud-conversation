@@ -249,7 +249,7 @@ function checkNested(obj /*, level1, level2, ... levelN*/) {
 
 function generateChannelName(projectName) {
 	if (projectName && projectName !== "") {
-		return "#" + projectName.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase().substring(0, 21);
+		return "#" + projectName.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase().substring(0, 21);
 	}
 
 	return null;
