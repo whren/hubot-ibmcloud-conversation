@@ -1141,7 +1141,7 @@ module.exports = function(robotAdapter) {
 													robot.logger.error("Team info message error result : " + res.error);
 												} else {
 													var team_name = res.team.domain;
-													resource.reply("Feedback will be sent to channel <htpps://" + team_name + ".slack.com/messages/" + generateChannelName(lisaContext.appName).substring(1) + "|" + generateChannelName(lisaContext.appName));				
+													resource.reply("Feedback will be sent to channel <https://" + team_name + ".slack.com/messages/" + generateChannelName(lisaContext.appName).substring(1) + "|" + generateChannelName(lisaContext.appName) + ">");
 												}
 											}
 										}
