@@ -538,7 +538,7 @@ module.exports = function(robotAdapter) {
 							}
 */
 							var channel_id = result.channel.id;
-							
+
 							var bot_id;
 							robot.adapter.client.web.users.list(
 								{
@@ -899,8 +899,7 @@ module.exports = function(robotAdapter) {
 								var lisaContext = conversations[room][user].resp.context.lisaContext;
 								
 								if (lisaContext.appType === "web" && lisaContext.appStatus === "new" && lisaContext.devops && lisaContext.appName) {
-									res.reply("Requesting project " + lisaContext.appName + " creation...");
-									res.reply("Feedback will be sent to channel " + generateChannelName(lisaContext.appName));
+									res.reply("Requesting project " + lisaContext.appName + " creation... Feedback will be sent to channel " + generateChannelName(lisaContext.appName));
 
 									var payload = {
 									    method:"POST",
