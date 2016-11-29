@@ -716,7 +716,7 @@ module.exports = function(robotAdapter) {
 
 
 														// Si le message concerne le destroy du projet
-														if (jsonMessage.jobName === "jhipster-destroy-trigger" && jsonMessage.buildStatus === "SUCCCES" && jsonMessage.statut === "Terminé") {
+														if (jsonMessage.jobName === "trigger-project-destroy" && jsonMessage.buildStatus === "SUCCCES" && jsonMessage.statut === "Terminé") {
 															// List everyone in channel
 															var channel_info = new Promise(
 																function(resolve, reject) {
@@ -1130,7 +1130,22 @@ module.exports = function(robotAdapter) {
 								var lisaContext = conversations[room][user].resp.context.lisaContext;
 								
 								if (lisaContext.appType === "web" && lisaContext.appStatus === "new" && lisaContext.devops && lisaContext.appName) {
-									res.reply("Requesting project " + lisaContext.appName + " creation... Feedback will be sent to channel " + generateChannelName(lisaContext.appName));
+									res.reply("Requesting project " + lisaContext.appName + " creation... ");
+									var resource = res;
+									robot.adapter.client.web.team.info(
+										function(err, res) {
+											if (err) {
+												robot.logger.error("Error occurs during team.info : " + err);
+											} else {
+												if (!res.ok) {
+													robot.logger.error("Team info message error result : " + res.error);
+												} else {
+													var team_name = res.team.domain;
+													resource.reply("Feedback will be sent to channel <htpps://" + team_name + ".slack.com/messages/" + generateChannelName(lisaContext.appName).substring(1) + "|" + generateChannelName(lisaContext.appName));				
+												}
+											}
+										}
+									);
 
 									var payload = {
 									    method:"POST",
