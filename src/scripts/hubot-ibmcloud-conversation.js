@@ -431,6 +431,7 @@ module.exports = function(robotAdapter) {
 					  		robot.logger.error("Joining channel error result : " + result.error);
 					  	} else {
 					  		// Invite bot user
+/*
 					  		if (robot.id) {
 					  			robot.logger.debug("robot.id " + robot.id);
 					  		}
@@ -524,103 +525,138 @@ module.exports = function(robotAdapter) {
 								}));
 								cache = null; // Enable garbage collection
 					  		}
+*/
 
-
-
-					  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + robot.adapter.bot_id)
-								.header("Content-Type", "application/json")
-								.post(JSON.stringify({}))(function(err, res, body) {
-							  if (res.statusCode === 200) {
-							  	robot.logger.debug("Response body of channels.invite : " + body);
-							  	var result = JSON.parse(body);
-							  	if (!result.ok && result.error !== "already_in_channel") {
-							  		robot.logger.error("Inviting bot to channel error result : " + result.error);
-							  	} else {
-									var attachments = {
-									    attachments: [
-									        {
-									            fallback: "Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> : <" +  jsonMessage.full_url + "|" + jsonMessage.jobName + "> est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
-									            mrkdwn_in: [
-									                "text",
-									                "title"
-									            ],
-									            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
-									            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
-									            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
-									            //title_link: jsonMessage.full_url,
-									            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
-									            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
-									            ts: ts
-									        }
-									    ],
-									    as_user: true
-									};
-
-									if (existing) {
-										robot.logger.debug("Request message update for " + jsonMessage.full_url);
-										robot.adapter.client.web.chat.update(
-											messages[jsonMessage.full_url].ts,
-											res.channel.id,
-											"",
-											{
-												attachments: [
-											        {
-											            fallback: "Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> : <" +  jsonMessage.full_url + "|" + jsonMessage.jobName + "> est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
-											            mrkdwn_in: [
-											                "text",
-											                "title"
-											            ],
-											            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
-											            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
-											            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
-											            //title_link: jsonMessage.full_url,
-											            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
-											            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
-											            ts: ts
-											        }
-											    ],
-											    as_user: true
-											},
-											function(err, res) {
-												if (err) {
-													robot.logger.error("Error occurs editing message : " + err);
-												} else {
-													if (!res.ok) {
-														robot.logger.error("Editing message error result : " + res.error);
-													} else {
-														messages[jsonMessage.full_url].ts = res.ts;
-														robot.logger.debug("Attachment " + messages[jsonMessage.full_url].ts + " edited with success ! (" + res.ts + ")");
-													}
-												}
-											}
-										);									
+/*
+							var in_channel = false;
+							for (var i = 0; i < res.channel.members.length; i++) {
+								if (res.members[i].name === robot.name) {
+									in_channel = true;
+									robot.logger.debug("Bot " + robot.name + " already in channel");
+									break;
+								}
+							}
+*/
+							var bot_id;
+							robot.adapter.client.web.users.list(
+								{
+									presence: 1
+								},
+								function(err, res) {
+									if (err) {
+										robot.logger.error("Error occurs listing users : " + err);
 									} else {
-									    attachments.token = process.env.HUBOT_SLACK_TOKEN;
-									    attachments.channel = channelName;
-									    attachments.text = "";
-
-
-										robot.adapter.client.web.chat.postMessage(
-											channelName,
-											"",
-											attachments,
-											function(err, res) {
-												if (err) {
-													robot.logger.error("Error occurs posting message : " + err);
-												} else {
-													if (!res.ok) {
-														robot.logger.error("Posting message error result : " + res.error);
-													} else {
-														messages[jsonMessage.full_url].ts = res.ts;
-														robot.logger.debug("Attachment " + res.ts + " posted with success ! (" + res + ")");
-													}
+										if (!res.ok) {
+											robot.logger.error("Listing users message error result : " + res.error);
+										} else {
+											for (var i = 0; i < res.members.length; i++) {
+												if (res.members[i].name === robot.name) {
+													bot_id = res.members[i].id;
+													robot.logger.debug("Bot id " + bot_id + " found for bot name " + robot.name);
+													break;
 												}
 											}
-										);
+
+											if (bot_id) {
+										  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + bot_id)
+													.header("Content-Type", "application/json")
+													.post(JSON.stringify({}))(function(err, res, body) {
+												  if (res.statusCode === 200) {
+												  	robot.logger.debug("Response body of channels.invite : " + body);
+												  	var result = JSON.parse(body);
+												  	if (!result.ok && result.error !== "already_in_channel") {
+												  		robot.logger.error("Inviting bot to channel error result : " + result.error);
+												  	} else {
+														var attachments = {
+														    attachments: [
+														        {
+														            fallback: "Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> : <" +  jsonMessage.full_url + "|" + jsonMessage.jobName + "> est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+														            mrkdwn_in: [
+														                "text",
+														                "title"
+														            ],
+														            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
+														            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
+														            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
+														            //title_link: jsonMessage.full_url,
+														            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
+														            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
+														            ts: ts
+														        }
+														    ],
+														    as_user: true
+														};
+
+														if (existing) {
+															robot.logger.debug("Request message update for " + jsonMessage.full_url);
+															robot.adapter.client.web.chat.update(
+																messages[jsonMessage.full_url].ts,
+																res.channel.id,
+																"",
+																{
+																	attachments: [
+																        {
+																            fallback: "Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> : <" +  jsonMessage.full_url + "|" + jsonMessage.jobName + "> est " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")),
+																            mrkdwn_in: [
+																                "text",
+																                "title"
+																            ],
+																            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
+																            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
+																            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
+																            //title_link: jsonMessage.full_url,
+																            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
+																            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
+																            ts: ts
+																        }
+																    ],
+																    as_user: true
+																},
+																function(err, res) {
+																	if (err) {
+																		robot.logger.error("Error occurs editing message : " + err);
+																	} else {
+																		if (!res.ok) {
+																			robot.logger.error("Editing message error result : " + res.error);
+																		} else {
+																			messages[jsonMessage.full_url].ts = res.ts;
+																			robot.logger.debug("Attachment " + messages[jsonMessage.full_url].ts + " edited with success ! (" + res.ts + ")");
+																		}
+																	}
+																}
+															);									
+														} else {
+														    attachments.token = process.env.HUBOT_SLACK_TOKEN;
+														    attachments.channel = channelName;
+														    attachments.text = "";
+
+
+															robot.adapter.client.web.chat.postMessage(
+																channelName,
+																"",
+																attachments,
+																function(err, res) {
+																	if (err) {
+																		robot.logger.error("Error occurs posting message : " + err);
+																	} else {
+																		if (!res.ok) {
+																			robot.logger.error("Posting message error result : " + res.error);
+																		} else {
+																			messages[jsonMessage.full_url].ts = res.ts;
+																			robot.logger.debug("Attachment " + res.ts + " posted with success ! (" + res + ")");
+																		}
+																	}
+																}
+															);
+														}
+												  	}
+												  }
+												});
+											}
+										}
 									}
-							  	}
-							  }
-							});
+								}
+							);
 					  	}
 					    return;
 					  }
