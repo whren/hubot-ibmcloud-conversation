@@ -537,6 +537,8 @@ module.exports = function(robotAdapter) {
 								}
 							}
 */
+							var channel_id = result.channel.id;
+							
 							var bot_id;
 							robot.adapter.client.web.users.list(
 								{
@@ -558,7 +560,7 @@ module.exports = function(robotAdapter) {
 											}
 
 											if (bot_id) {
-										  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + result.channel.id + "&user=" + bot_id)
+										  		robot.http("https://slack.com/api/channels.invite?token=" + process.env.HUBOT_SLACK_USER_TOKEN + "&channel=" + channel_id + "&user=" + bot_id)
 													.header("Content-Type", "application/json")
 													.post(JSON.stringify({}))(function(err, res, body) {
 												  if (res.statusCode === 200) {
@@ -591,7 +593,7 @@ module.exports = function(robotAdapter) {
 															robot.logger.debug("Request message update for " + jsonMessage.full_url);
 															robot.adapter.client.web.chat.update(
 																messages[jsonMessage.full_url].ts,
-																res.channel.id,
+																channel_id,
 																"",
 																{
 																	attachments: [
