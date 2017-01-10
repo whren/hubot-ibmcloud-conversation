@@ -398,16 +398,22 @@ module.exports = function(robotAdapter) {
 				if (jsonMessage) {
 					var ts = Date.now()/1000;
 					var existing = false;
+					var messageKey = jsonMessage.full_url;
 
-					if (!messages[jsonMessage.full_url]) {
-						messages[jsonMessage.full_url] = {
+					// If we are on pipeline dsl stage message
+					if (jsonMessage.stage) {
+						messageKey += jsonMessage.stage;
+					}
+
+					if (!messages[messageKey]) {
+						messages[messageKey] = {
 							ts: ts
 						};
 					} else {
 						existing = true;
 					}
 
-					robot.logger.debug("Notification for jsonMessage.full_url : " + JSON.stringify(messages[jsonMessage.full_url]) + (existing ? " (existing)" : ""));
+					robot.logger.debug("Notification for messageKey : " + JSON.stringify(messages[messageKey]) + (existing ? " (existing)" : ""));
 
 					var channelName = generateChannelName(jsonMessage.projectName);
 
@@ -640,8 +646,8 @@ module.exports = function(robotAdapter) {
 														                "title"
 														            ],
 														            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
-														            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
-														            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
+														            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">" + (jsonMessage.stage ? " - Stage " + jsonMessage.stage : ""),
+														            text: (jsonMessage.stage ? "Stage " : "Job ") + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
 														            //title_link: jsonMessage.full_url,
 														            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
 														            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
@@ -654,7 +660,7 @@ module.exports = function(robotAdapter) {
 														if (existing) {
 															robot.logger.debug("Request message update for " + jsonMessage.full_url);
 															robot.adapter.client.web.chat.update(
-																messages[jsonMessage.full_url].ts,
+																messages[messageKey].ts,
 																channel_id,
 																"",
 																{
@@ -666,8 +672,8 @@ module.exports = function(robotAdapter) {
 																                "title"
 																            ],
 																            color: (jsonMessage.buildStatus === 'FAILURE' ? "danger" : (jsonMessage.buildStatus === 'SUCCESS' ? "good" : "#439FE0")),
-																            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">",
-																            text: "Job " + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
+																            title: (jsonMessage.buildStatus === 'FAILURE' ? ":x:" : (jsonMessage.buildStatus === 'SUCCESS' ? ":white_check_mark:" : ":arrow_forward:")) + " Projet <" + jsonMessage.project_url + "|" + jsonMessage.projectName + "> - Job <" + jsonMessage.jenkins_url + jsonMessage.url + "|" + jsonMessage.jobName + "> - Build <" + jsonMessage.full_url + "|#" + jsonMessage.buildNumber + ">" + (jsonMessage.stage ? " - Stage " + jsonMessage.stage : ""),
+																            text: (jsonMessage.stage ? "Stage " : "Job ") + jsonMessage.statut + (jsonMessage.buildStatus === 'FAILURE' ? " en échec" : (jsonMessage.buildStatus === 'SUCCESS' ? " avec succès" : "")) + " [<" + jsonMessage.full_url + "console" + "|Console>]",
 																            //title_link: jsonMessage.full_url,
 																            footer: "<" + jsonMessage.jenkins_url + "|Jenkins>",
 																            footer_icon: "https://jenkins.io/images/226px-Jenkins_logo.svg.png",
@@ -683,8 +689,8 @@ module.exports = function(robotAdapter) {
 																		if (!res.ok) {
 																			robot.logger.error("Editing message error result : " + res.error);
 																		} else {
-																			messages[jsonMessage.full_url].ts = res.ts;
-																			robot.logger.debug("Attachment " + messages[jsonMessage.full_url].ts + " edited with success ! (" + res.ts + ")");
+																			messages[messageKey].ts = res.ts;
+																			robot.logger.debug("Attachment " + messages[messageKey].ts + " edited with success ! (" + res.ts + ")");
 																		}
 																	}
 																}
@@ -706,7 +712,7 @@ module.exports = function(robotAdapter) {
 																		if (!res.ok) {
 																			robot.logger.error("Posting message error result : " + res.error);
 																		} else {
-																			messages[jsonMessage.full_url].ts = res.ts;
+																			messages[messageKey].ts = res.ts;
 																			robot.logger.debug("Attachment " + res.ts + " posted with success ! (" + res + ")");
 																		}
 																	}
